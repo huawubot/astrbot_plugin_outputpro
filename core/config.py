@@ -200,6 +200,7 @@ class SplitConfig(ConfigNode):
     max_length: int
     char_list: list[str]
     max_count: int
+    count_jitter_prob: float = 0.0
     per_char_delay: float
     delay_scope_str: str
     show_typing: bool
