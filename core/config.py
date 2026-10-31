@@ -1,6 +1,7 @@
 # config.py
 from __future__ import annotations
 
+import random
 import re
 from collections.abc import Mapping, MutableMapping
 from pathlib import Path
@@ -199,7 +200,8 @@ class RecallConfig(ConfigNode):
 class SplitConfig(ConfigNode):
     max_length: int
     char_list: list[str]
-    max_count: int
+    base_count: int
+    count_fluctuation_prob: float
     per_char_delay: float
     delay_scope_str: str
     show_typing: bool
@@ -223,14 +225,24 @@ class SplitConfig(ConfigNode):
         except Exception:
             self.min_delay, self.max_delay = 1, 20
 
+    def sample_count(self) -> int:
+        count = self.base_count
+        if (
+            count > 0
+            and self.count_fluctuation_prob > 0
+            and random.random() < self.count_fluctuation_prob
+        ):
+            count = max(1, count + random.choice((-1, 1)))
+        return count
+
     def _build_split_pattern(self) -> str:
         if not self.char_list:
             return r"(?!x)x"
         tokens: list[str] = []
         for ch in self.char_list:
-            if ch == "\n" or (len(ch) > 1 and ch.lstrip("\\") == "n"):
+            if ch in ("\\n", "\n"):
                 tokens.append("\n")
-            elif ch == " " or (len(ch) > 1 and ch.lstrip("\\") == "s"):
+            elif ch == "\\s":
                 tokens.append(r"\s")
             else:
                 tokens.append(re.escape(ch))
@@ -239,9 +251,9 @@ class SplitConfig(ConfigNode):
     def _build_split_priority(self) -> dict[str, int]:
         priority: dict[str, int] = {}
         for idx, ch in enumerate(self.char_list):
-            if ch == "\n" or (len(ch) > 1 and ch.lstrip("\\") == "n"):
+            if ch == "\\n":
                 priority.setdefault("\n", idx)
-            elif ch == " " or (len(ch) > 1 and ch.lstrip("\\") == "s"):
+            elif ch == "\\s":
                 priority.setdefault(" ", idx)
             else:
                 priority.setdefault(ch, idx)
