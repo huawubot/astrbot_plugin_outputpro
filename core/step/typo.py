@@ -70,7 +70,9 @@ class ChineseTypoGenerator:
             return {}
 
         max_freq = max(char_freq.values())
-        normalized_freq = {char: freq / max_freq * 1000 for char, freq in char_freq.items()}
+        normalized_freq = {
+            char: freq / max_freq * 1000 for char, freq in char_freq.items()
+        }
 
         with cache_file.open("w", encoding="utf-8") as f:
             json.dump(normalized_freq, f, ensure_ascii=False, indent=2)
@@ -133,7 +135,9 @@ class ChineseTypoGenerator:
         possible_tones.remove(tone)
         return base + str(random.choice(possible_tones))
 
-    def _calculate_replacement_probability(self, orig_freq: float, target_freq: float) -> float:
+    def _calculate_replacement_probability(
+        self, orig_freq: float, target_freq: float
+    ) -> float:
         if target_freq > orig_freq:
             return 1.0
 
@@ -143,7 +147,9 @@ class ChineseTypoGenerator:
 
         return math.exp(-3 * freq_diff / self.max_freq_diff)
 
-    def _get_similar_frequency_chars(self, char: str, py: str, num_candidates: int = 5) -> list[str] | None:
+    def _get_similar_frequency_chars(
+        self, char: str, py: str, num_candidates: int = 5
+    ) -> list[str] | None:
         homophones: list[str] = []
 
         if random.random() < self.tone_error_rate:
@@ -213,7 +219,9 @@ class ChineseTypoGenerator:
             new_word_freq = self.word_frequency[new_word]
             if new_word_freq < min_word_freq:
                 continue
-            char_avg_freq = sum(self.char_frequency.get(c, 0) for c in new_word) / len(new_word)
+            char_avg_freq = sum(self.char_frequency.get(c, 0) for c in new_word) / len(
+                new_word
+            )
             combined_score = new_word_freq * 0.7 + char_avg_freq * 0.3
             if combined_score >= self.min_freq:
                 homophones.append((new_word, combined_score))
@@ -221,7 +229,9 @@ class ChineseTypoGenerator:
         sorted_homophones = sorted(homophones, key=lambda x: x[1], reverse=True)
         return sorted_homophones[:5]
 
-    def create_typo_sentence(self, sentence: str) -> tuple[str, str | None, list[tuple[str, str]]]:
+    def create_typo_sentence(
+        self, sentence: str
+    ) -> tuple[str, str | None, list[tuple[str, str]]]:
         result: list[str] = []
         word_typos: list[tuple[str, str]] = []
         char_typos: list[tuple[str, str]] = []
@@ -235,7 +245,10 @@ class ChineseTypoGenerator:
 
             word_pinyin = self._get_word_pinyin(word)
 
-            if self._should_try_word_replacement(word) and random.random() < self.word_replace_rate:
+            if (
+                self._should_try_word_replacement(word)
+                and random.random() < self.word_replace_rate
+            ):
                 word_homophones = self._get_word_homophones(word)
                 if word_homophones:
                     candidates = [candidate for candidate, _score in word_homophones]
@@ -255,7 +268,9 @@ class ChineseTypoGenerator:
                         typo_char = random.choice(similar_chars)
                         typo_freq = self.char_frequency.get(typo_char, 0)
                         orig_freq = self.char_frequency.get(char, 0)
-                        replace_prob = self._calculate_replacement_probability(orig_freq, typo_freq)
+                        replace_prob = self._calculate_replacement_probability(
+                            orig_freq, typo_freq
+                        )
                         if random.random() < replace_prob:
                             result.append(typo_char)
                             char_typos.append((typo_char, char))
@@ -336,7 +351,6 @@ class TypoStep(BaseStep):
             return None
         return "\n"
 
-
     @staticmethod
     def _get_chain_text_length(chain: list[Plain]) -> int:
         return sum(len(seg.text) for seg in chain if isinstance(seg, Plain))
@@ -377,7 +391,7 @@ class TypoStep(BaseStep):
         from .split import SplitStep
 
         split_step = SplitStep(self.plugin_config)
-        preview_segments = split_step._split_chain(preview_chain)
+        preview_segments = split_step._split_chain(preview_chain, ctx=ctx)
         if len(preview_segments) <= 1:
             return False
 
@@ -401,7 +415,9 @@ class TypoStep(BaseStep):
             if not seg.text or not seg.text.strip():
                 continue
 
-            typoed_text, typo_corrections, replacements = generator.create_typo_sentence(seg.text)
+            typoed_text, typo_corrections, replacements = (
+                generator.create_typo_sentence(seg.text)
+            )
             processed_parts = [typoed_text]
             if typo_corrections and random.random() < self.cfg.correction_append_prob:
                 if self._should_append_correction(

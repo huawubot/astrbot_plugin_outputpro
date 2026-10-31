@@ -341,7 +341,7 @@ class SplitStep(BaseStep):
                 return StepResult()
 
         # 分段
-        segments = self._split_chain(ctx.chain)
+        segments = self._split_chain(ctx.chain, ctx=ctx)
 
         # 后处理
         for seg in segments:
@@ -407,14 +407,16 @@ class SplitStep(BaseStep):
     # =========================
     # 核心 split
     # =========================
-    def _select_split_points(self, tokens: list[Token], max_count: int | None = None) -> set[int]:
+    def _select_split_points(
+        self, tokens: list[Token], max_count: int | None = None
+    ) -> set[int]:
         """
         选切点（最多 max_count 段 → k = max_count-1 个切点）
         规则：
         1. 优先使用语义切点（is_split）
         2. 按累计长度均分选择切点
         """
-        max_count = self.cfg.max_count if max_count is None else max_count
+        max_count = self.cfg.base_count if max_count is None else max_count
         split_idx = [i for i, t in enumerate(tokens) if t.is_split and t.text.strip()]
         if not split_idx:
             return set()
@@ -460,8 +462,14 @@ class SplitStep(BaseStep):
         return selected
 
     def _split_chain(
-        self, chain: list[BaseMessageComponent]
+        self, chain: list[BaseMessageComponent], *, ctx: OutContext | None = None
     ) -> list[Segment]:
+        effective_max_count = ctx.split_max_count if ctx is not None else None
+        if effective_max_count is None:
+            effective_max_count = self.cfg.sample_count()
+            if ctx is not None:
+                ctx.split_max_count = effective_max_count
+
         builder = SegmentBuilder()
 
         for comp in chain:
@@ -477,7 +485,7 @@ class SplitStep(BaseStep):
                     continue
 
                 tokens = list(self.tokenizer.tokenize(text))
-                selected = self._select_split_points(tokens)
+                selected = self._select_split_points(tokens, effective_max_count)
 
                 for i, token in enumerate(tokens):
                     builder.append([Plain(token.text)])

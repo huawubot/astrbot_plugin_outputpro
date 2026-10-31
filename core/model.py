@@ -47,7 +47,8 @@ class OutContext:
     bid: str
     group: GroupState
     timestamp: int
-
+    split_max_count: int | None = None
+    """Sampled split limit shared by typo previews and final splitting."""
 
 
 class StepName(str, Enum):

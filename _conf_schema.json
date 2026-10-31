@@ -716,9 +716,9 @@
                 },
                 "default": 200
             },
-            "max_count": {
-                "description": "最大分段数",
-                "hint": "此处设定每句消息最多可以分成多少段话来发送",
+            "base_count": {
+                "description": "基准分段数",
+                "hint": "分段多少段以此值为基准，按浮动概率+1或-1，最低为 1；实际段数可能因可用切分点不足而更少",
                 "type": "int",
                 "slider": {
                     "min": 1,
@@ -726,6 +726,17 @@
                     "step": 1
                 },
                 "default": 2
+            },
+            "count_fluctuation_prob": {
+                "description": "分段数浮动概率",
+                "hint": "每条回复触发分段数浮动的总概率；命中后等概率增加或减少 1。设为 0 关闭浮动，例如 0.4 表示有 40% 概率 +1 或 -1 段",
+                "type": "float",
+                "slider": {
+                    "min": 0,
+                    "max": 1,
+                    "step": 0.01
+                },
+                "default": 0
             },
             "char_list": {
                 "description": "触发分段的字符",
