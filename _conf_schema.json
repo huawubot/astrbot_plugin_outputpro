@@ -98,11 +98,14 @@
                 ]
             },
             "quotes_files": {
-                "description": "金句文件路径",
-                "hint": "可在文件中维护金句。支持相对路径与绝对路径，请使用 / 作为路径分隔符。可填写多个路径，系统会与默认金句合并后随机抽取",
-                "type": "list",
+                "description": "金句文件",
+                "hint": "上传一个或多个 JSON 金句文件，文件内容须为字符串数组。系统会与默认金句合并后随机抽取",
+                "type": "file",
                 "default": [
-                    "data/plugins/astrbot_plugin_outputpro/default_quotes.json"
+                    "files/summary/quotes_files/default_quotes.json"
+                ],
+                "file_types": [
+                    "json"
                 ]
             }
         }

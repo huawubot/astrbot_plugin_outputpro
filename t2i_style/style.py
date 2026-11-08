@@ -41,11 +41,28 @@ def modern_clear_background(width: int, height: int) -> Image.Image:
     line_gap = 42 * scale
     first_line = top_y + 76 * scale
     for y in range(first_line, bottom_y - 18 * scale, line_gap):
-        paper_draw.line((left + 34 * scale, y, right - 28 * scale, y), fill=(126, 170, 205, 72), width=1 * scale)
+        paper_draw.line(
+            (left + 34 * scale, y, right - 28 * scale, y),
+            fill=(126, 170, 205, 72),
+            width=1 * scale,
+        )
 
     margin_line_x = left + 72 * scale
-    paper_draw.line((margin_line_x, top_y + 10 * scale, margin_line_x, bottom_y - 10 * scale), fill=(210, 78, 88, 120), width=2 * scale)
-    paper_draw.line((margin_line_x + 8 * scale, top_y + 10 * scale, margin_line_x + 8 * scale, bottom_y - 10 * scale), fill=(210, 78, 88, 45), width=1 * scale)
+    paper_draw.line(
+        (margin_line_x, top_y + 10 * scale, margin_line_x, bottom_y - 10 * scale),
+        fill=(210, 78, 88, 120),
+        width=2 * scale,
+    )
+    paper_draw.line(
+        (
+            margin_line_x + 8 * scale,
+            top_y + 10 * scale,
+            margin_line_x + 8 * scale,
+            bottom_y - 10 * scale,
+        ),
+        fill=(210, 78, 88, 45),
+        width=1 * scale,
+    )
 
     hole_x = left + 28 * scale
     hole_radius = 9 * scale
@@ -54,11 +71,21 @@ def modern_clear_background(width: int, height: int) -> Image.Image:
     y = top_y + 70 * scale
     while y < bottom_y - 42 * scale:
         paper_draw.ellipse(
-            (hole_x - hole_radius + hole_shadow, y - hole_radius + hole_shadow, hole_x + hole_radius + hole_shadow, y + hole_radius + hole_shadow),
+            (
+                hole_x - hole_radius + hole_shadow,
+                y - hole_radius + hole_shadow,
+                hole_x + hole_radius + hole_shadow,
+                y + hole_radius + hole_shadow,
+            ),
             fill=(108, 91, 64, 42),
         )
         paper_draw.ellipse(
-            (hole_x - hole_radius, y - hole_radius, hole_x + hole_radius, y + hole_radius),
+            (
+                hole_x - hole_radius,
+                y - hole_radius,
+                hole_x + hole_radius,
+                y + hole_radius,
+            ),
             fill=(224, 216, 195, 255),
             outline=(188, 174, 146, 255),
             width=1 * scale,
@@ -72,7 +99,9 @@ def modern_clear_background(width: int, height: int) -> Image.Image:
         )
         y += hole_step
 
-    paper_draw.rectangle((left, top_y + 1 * scale, right, top_y + 11 * scale), fill=(255, 255, 255, 52))
+    paper_draw.rectangle(
+        (left, top_y + 1 * scale, right, top_y + 11 * scale), fill=(255, 255, 255, 52)
+    )
 
     composed = Image.alpha_composite(canvas.convert("RGBA"), shadow)
     composed = Image.alpha_composite(composed, paper)
